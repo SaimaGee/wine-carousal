@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Carousel from './components/Carousel';
 import './App.css';
 import productData from './assets/payload/data.json'; 
