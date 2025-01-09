@@ -23,7 +23,7 @@
     padding: 16px;
     background-color: #fff;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    text-align: center;
+    text-align: right;
     position: relative;
   }
   
@@ -97,4 +97,13 @@
   
   .add-to-cart:hover {
     background-color: #c9302c;
+  }
+
+  .product-name,
+  .product-description,
+  .was-price,
+  .current-price,
+  .points {
+    text-align: left; /* Align text to the left */
+    display: block;   /* Ensure each element takes up its own line */
   }
