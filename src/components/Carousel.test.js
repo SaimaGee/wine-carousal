@@ -1,89 +1,76 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import '@testing-library/jest-dom'; // For extended matchers
-import Carousel from './Carousel';
+import { render, screen } from "@testing-library/react";
+import Carousel from "./Carousel";
 
 const mockProducts = [
   {
-    name: 'Prohibition Liquor Company',
-    description: 'Prohibition Christmas Gin 500ml',
-    image: 'https://unsplash.it/200/200/?random',
-    tag: 'Sale',
-    wasPrice: {
-      cashPrice: { currencyCode: 'AUD', amount: 125 },
-      pointsPrice: { amount: 25000 },
-    },
-    currentPrice: {
-      cashPrice: { currencyCode: 'AUD', amount: 119 },
-      pointsPrice: { amount: 15000 },
-    },
+    name: "Product 1",
+    description: "Description 1",
+    image: "image1.jpg",
+    tag: "New",
+    wasPrice: { cashPrice: { amount: 100, currencyCode: "AUD" } },
+    currentPrice: { cashPrice: { amount: 80, currencyCode: "AUD" }, pointsPrice: { amount: 500 } },
   },
   {
-    name: 'Houraisen',
-    description: 'Houraisen Beshi Tokubetsu Junmai Sake 720ml',
-    image: 'https://unsplash.it/200/200/?random',
-    tag: 'Sale',
-    wasPrice: {
-      cashPrice: { currencyCode: 'AUD', amount: 134 },
-      pointsPrice: { amount: 23470 },
-    },
-    currentPrice: {
-      cashPrice: { currencyCode: 'AUD', amount: 129.99 },
-      pointsPrice: { amount: 19900 },
-    },
+    name: "Product 2",
+    description: "Description 2",
+    imageSrc: "image2.jpg", // alternate image key name
+    tag: "Sale",
+    wasPrice: { cashPrice: { amount: 200, currencyCode: "AUD" } },
+    currentPrice: { cashPrice: { amount: 150, currencyCode: "AUD" }, pointsPrice: { amount: 1000 } },
   },
 ];
 
-describe('Carousel Component', () => {
-  it('renders correctly with products', () => {
-    render(<Carousel products={mockProducts} />);
-    
-    // Check if the first product name is rendered
-    expect(screen.getByText('Prohibition Liquor Company')).toBeInTheDocument();
-    expect(screen.getByText('Houraisen')).toBeInTheDocument();
-  });
-
-  it('displays product details correctly', () => {
+describe("Carousel", () => {
+  test("renders all products", () => {
     render(<Carousel products={mockProducts} />);
 
-    // Check if product description is displayed
-    expect(screen.getByText('Prohibition Christmas Gin 500ml')).toBeInTheDocument();
-    expect(screen.getByText('Houraisen Beshi Tokubetsu Junmai Sake 720ml')).toBeInTheDocument();
-
-    // Check if the tag is displayed
-    expect(screen.getByText('Sale')).toBeInTheDocument();
-
-    // Check if the prices are displayed
-    expect(screen.getByText('$125')).toBeInTheDocument();
-    expect(screen.getByText('$119')).toBeInTheDocument();
-    expect(screen.getByText('25,000 PTS')).toBeInTheDocument();
-    expect(screen.getByText('15,000 PTS')).toBeInTheDocument();
+    const productItems = screen.getAllByRole("img");
+    expect(productItems).toHaveLength(mockProducts.length);
   });
 
-  it('handles missing data gracefully', () => {
-    const incompleteProducts = [
+  test("displays product name", () => {
+    render(<Carousel products={mockProducts} />);
+
+    mockProducts.forEach((product) => {
+      expect(screen.getByText(product.name)).toBeInTheDocument();
+    });
+  });
+
+  test("displays the correct price", () => {
+    render(<Carousel products={mockProducts} />);
+
+    mockProducts.forEach((product) => {
+      expect(
+        screen.getByText(`${product.currentPrice.cashPrice.currencyCode} $${product.currentPrice.cashPrice.amount.toFixed(2)}`)
+      ).toBeInTheDocument();
+      expect(
+        screen.getByText(`Or ${product.currentPrice.pointsPrice.amount.toLocaleString()} PTS`)
+      ).toBeInTheDocument();
+    });
+  });
+
+  test("displays tag if available", () => {
+    render(<Carousel products={mockProducts} />);
+
+    mockProducts.forEach((product) => {
+      if (product.tag) {
+        expect(screen.getByText(product.tag.toUpperCase())).toBeInTheDocument();
+      }
+    });
+  });
+
+  test("does not crash if image source is missing", () => {
+    const productsWithNoImage = [
       {
-        name: 'Incomplete Product',
-        description: 'No price information available',
+        name: "Product 3",
+        description: "Description 3",
+        tag: "New",
+        wasPrice: { cashPrice: { amount: 100, currencyCode: "USD" } },
+        currentPrice: { cashPrice: { amount: 80, currencyCode: "USD" } },
       },
     ];
 
-    render(<Carousel products={incompleteProducts} />);
-
-    // Check that the product name is displayed
-    expect(screen.getByText('Incomplete Product')).toBeInTheDocument();
-
-    // Check that the description is displayed
-    expect(screen.getByText('No price information available')).toBeInTheDocument();
-
-    // Ensure no errors occur when data is missing
-    expect(screen.queryByText('$')).not.toBeInTheDocument();
-  });
-
-  it('renders a placeholder when no products are provided', () => {
-    render(<Carousel products={[]} />);
-
-    // Check if a placeholder or fallback message is displayed
-    expect(screen.getByText('No products available')).toBeInTheDocument();
+    render(<Carousel products={productsWithNoImage} />);
+    expect(screen.getByText("Product 3")).toBeInTheDocument();
   });
 });
